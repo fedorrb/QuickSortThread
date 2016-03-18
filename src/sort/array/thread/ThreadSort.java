@@ -1,18 +1,23 @@
 package sort.array.thread;
 
+import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
+
 public class ThreadSort implements Runnable {
 	private int p;
 	private int r;
 	private int[] A;
-	private Thread thr;
+	private Counter counter;
+	private ExecutorService executorService;
 
-	public ThreadSort(int[] A, int p, int r) {
+	public ThreadSort(int[] A, int p, int r, Counter counter, ExecutorService executorService) {
 		super();
 		this.p = p;
 		this.r = r;
 		this.A = A;
-		thr = new Thread(this);
-		thr.start();
+		this.counter = counter;
+		counter.increment();
+		this.executorService = executorService;		
 	}
 
 	@Override
@@ -20,23 +25,15 @@ public class ThreadSort implements Runnable {
 		if (p < r) {
 			if ((r - p) > 50000) { //arrays smaller than 50,000 sort without creating threads
 				int q = QuickSortOperation.Partition(A, p, r);
-				try {
-					ThreadSort ts1 = new ThreadSort(A, p, q - 1);
-					ThreadSort ts2 = new ThreadSort(A, q + 1, r);
-					ts1.getThr().join();
-					ts2.getThr().join();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+				executorService.execute(new ThreadSort(A, p, q - 1, counter, executorService));
+				executorService.execute(new ThreadSort(A, q + 1, r, counter, executorService));
 			} else {
 				QuickSortOperation.QuickSort(A, p, r);
+				//Arrays.parallelSort(A,p,r+1);
 			}
-
 		}
-	}
-
-	public Thread getThr() {
-		return thr;
+		counter.decrement();
+		System.out.println(counter.getNum()); 
 	}
 
 }

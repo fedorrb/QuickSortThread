@@ -11,7 +11,7 @@ public class QuickSortOperation {
 	 * @param A input array
 	 * @param p initial index
 	 * @param r final index
-	 * @return index reference element
+	 * @return index pivot element
 	 */
     public static int Partition(int[] A, int p, int r)
     {
